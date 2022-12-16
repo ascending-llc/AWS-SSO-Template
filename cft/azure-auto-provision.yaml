@@ -1,0 +1,51 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Enable the auto provisioning for the aws app in the azure we just configured.
+
+
+Parameters:
+  azureParametersStack:
+    Description: Name of the CloudFormation stack that contains azure parameters and bucket name
+    Type: String
+  azureSSOAppStack:
+    Description: Name of the CloudFormation stack for azure sso app template
+    Type: String
+  SCIMEndpoint:
+    Description: Enabled Automatic provisioning in your Identity Center directory, will show this endpoint
+    Type: String
+  AccessToken:
+    Description: Enabled Automatic provisioning in your Identity Center directory, will show this token
+    Type: String
+    NoEcho: true
+
+Resources:
+  SCIMEndpointUrl:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: SCIMEndpoint
+      Type: String
+      Value: !Ref SCIMEndpoint
+      Description: Enabled Automatic provisioning in your Identity Center directory, will show this endpoint
+  AccessTokenIAM:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: AccessToken
+      Type: String
+      Value: !Ref AccessToken
+      Description: Enabled Automatic provisioning in your Identity Center directory, will show this token
+  Lambda:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Timeout: 60
+      Code:
+        S3Bucket: 
+          Fn::ImportValue: !Sub ${azureParametersStack}-S3BucketName
+        S3Key: 'lambda-provision.zip'
+      Handler: lambda-provision.lambda_handler
+      Role:
+        Fn::ImportValue: !Sub ${azureSSOAppStack}-LambdaRoleArn
+      Runtime: python3.8
+      Layers:
+        - Fn::ImportValue: !Sub ${azureSSOAppStack}-AzureLayerArn
+
+

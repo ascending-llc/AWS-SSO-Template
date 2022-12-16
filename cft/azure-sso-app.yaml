@@ -57,3 +57,18 @@ Resources:
         S3Key: 'python.zip'
       LayerName: azureIdentityLayer
       LicenseInfo: 'https://pypi.org/project/azure-identity/'
+
+
+
+Outputs:
+  LambdaRoleArn:
+    Description: IAM Role Arn for Lambda function
+    Value: !GetAtt LambdaRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-LambdaRoleArn
+  AzureLayerArn:
+    Description: Azure Layer Arn for Lambda function
+    Value: !Ref AzureLayer
+    Export:
+      Name: !Sub ${AWS::StackName}-AzureLayerArn
+
