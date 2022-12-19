@@ -7,7 +7,7 @@ Parameters:
   azureParametersStack:
     Description: Name of the CloudFormation stack that contains azure parameters and bucket name
     Type: String
-
+# change to SAM template.yml as setup-2
 Resources:
   LambdaRole:
     Type: "AWS::IAM::Role"

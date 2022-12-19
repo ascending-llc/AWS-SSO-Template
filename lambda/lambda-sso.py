@@ -8,7 +8,7 @@ import requests
 def lambda_handler(event, context):
     
     ssm_client = boto3.client('ssm')
-    
+    # environment variable for graph_api https://graph.microsoft.com/
     client_id = ssm_client.get_parameter(Name='clientId')['Parameter']['Value']
     client_secret = ssm_client.get_parameter(Name='clientSecret')['Parameter']['Value']
     scope = 'https://graph.microsoft.com/.default'
@@ -69,7 +69,7 @@ def add_groups(url_dic,header_dic,group_ids,ids):
         #print(r.status_code)
 
 
-
+# environment variable 
 def create_groups(url_dic,header_dic):
     group_name = ['admin-group', 'power-user-group', 'read-only-group']
     group_ids = []
@@ -86,7 +86,7 @@ def create_groups(url_dic,header_dic):
         group_ids.append(result['id'])
     return group_ids
 
-
+# functional varabile AWS Single Sign-on
 def create_aws_app(url_dic,header_dic):
     
     r = requests.get(url_dic['get_template_url'], headers=header_dic['header_1'])
