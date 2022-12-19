@@ -19,20 +19,22 @@ Parameters:
     NoEcho: true
 
 Resources:
-  SCIMEndpointUrl:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: SCIMEndpoint
-      Type: String
-      Value: !Ref SCIMEndpoint
-      Description: Enabled Automatic provisioning in your Identity Center directory, will show this endpoint
-  AccessTokenIAM:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: AccessToken
-      Type: String
-      Value: !Ref AccessToken
-      Description: Enabled Automatic provisioning in your Identity Center directory, will show this token
+  # optional value in the secret manager, update in the step3
+  # merge into step2
+  # SCIMEndpointUrl:
+  #   Type: AWS::SSM::Parameter
+  #   Properties:
+  #     Name: SCIMEndpoint
+  #     Type: String
+  #     Value: !Ref SCIMEndpoint
+  #     Description: Enabled Automatic provisioning in your Identity Center directory, will show this endpoint
+  # AccessTokenIAM:
+  #   Type: AWS::SSM::Parameter
+  #   Properties:
+  #     Name: AccessToken
+  #     Type: String
+  #     Value: !Ref AccessToken
+  #     Description: Enabled Automatic provisioning in your Identity Center directory, will show this token
   Lambda:
     Type: AWS::Lambda::Function
     Properties: 
