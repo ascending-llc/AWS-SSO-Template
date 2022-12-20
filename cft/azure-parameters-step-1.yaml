@@ -19,52 +19,32 @@ Parameters:
   acsUrl:
     Type: String
     Description: IAM Identity Center Assertion Consumer Service (ACS) URL
+  SCIMEndpoint:
+    Description: After enabled Automatic provisioning in your AWS Identity Center, will show this endpoint
+    Type: String
+    Default: None
+  AccessToken:
+    Description: After enabled Automatic provisioning in your AWS Identity Center, will show this token
+    Type: String
+    NoEcho: true
+    Default: None
   BucketName:
-    Description: Bucket name to store the lambda zip code
-    Type: String- 
-    # make it conditional
+    Description: Bucket name for sam deployment
+    Type: String
+    Default: aws-sso-sam-bucket
 
 Resources:
   S3Bucket: 
     Type: AWS::S3::Bucket
     Properties: 
       BucketName: !Ref BucketName
-      # add following paramters in one secret manager as key/value pair
-  # clientIdParameter:
-  #   Type: AWS::SSM::Parameter
-  #   Properties:
-  #     Name: clientId
-  #     Type: String
-  #     Value: !Ref clientId
-  #     Description: Azure AD app client id
-  # clientSecretParameter:
-  #   Type: AWS::SSM::Parameter
-  #   Properties:
-  #     Name: clientSecret
-  #     Type: String
-  #     Value: !Ref clientSecret
-  #     Description: Azure AD app secret value
-  # tenantIdParameter:
-  #   Type: AWS::SSM::Parameter
-  #   Properties:
-  #     Name: tenantId
-  #     Type: String
-  #     Value: !Ref tenantId
-  #     Description: Azure AD tenant id
-  # identityUrlParameter:
-  #   Type: AWS::SSM::Parameter
-  #   Properties:
-  #     Name: identityUrl
-  #     Type: String
-  #     Value: !Ref identityUrl
-  #     Description: IAM Identity Center issuer URL
-  # acsUrlParameter:
-  #   Type: AWS::SSM::Parameter
-  #   Properties:
-  #     Name: acsUrl
-  #     Type: String
-  #     Value: !Ref acsUrl
-  #     Description: IAM Identity Center Assertion Consumer Service (ACS) URL
+  SsoSecrets:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Name: SsoAzureAwsParameters
+      Description: This secret contains all the parameters needed for sso setup between aws and azure ad
+      SecretString: !Sub '{"clientId":"${clientId}", "clientSecret":"${clientSecret}", "tenantId":"${tenantId}", "identityUrl":"${identityUrl}", "acsUrl":"${acsUrl}", "SCIMEndpoint":"${SCIMEndpoint}", "AccessToken":"${AccessToken}"}'
+
 
 Outputs:
   S3BucketName:
@@ -72,3 +52,9 @@ Outputs:
     Value: !Ref S3Bucket
     Export:
       Name: !Sub ${AWS::StackName}-S3BucketName
+  SecretArn:
+    Description: The arn of this sso secret
+    Value: !Ref SsoSecrets
+    Export:
+      Name: !Sub ${AWS::StackName}-SecretArn
+

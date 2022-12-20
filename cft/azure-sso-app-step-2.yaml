@@ -1,13 +1,13 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Description: Configure aws sso app on azure ad by lambda function
 
-
 Parameters:
-  azureParametersStack:
-    Description: Name of the CloudFormation stack that contains azure parameters and bucket name
+  ParameterStack:
+    Description: Name of the CloudFormation stack that contains the parameters for sso config
     Type: String
-# change to SAM template.yml as setup-2
+
 Resources:
   LambdaRole:
     Type: "AWS::IAM::Role"
@@ -25,38 +25,60 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
-        - PolicyName: AllowGetSSMParameter
+        - PolicyName: AllowGetSSOParameters
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
-                  - "ssm:GetParameter*"
-                Resource: "*"
+                  - "secretsmanager:GetSecretValue"
+                Resource:
+                  Fn::ImportValue: !Sub ${ParameterStack}-SecretArn
   Lambda:
-    Type: AWS::Lambda::Function
+    Type: AWS::Serverless::Function
     Properties: 
-      Timeout: 60
-      Code:
-        S3Bucket: 
-          Fn::ImportValue: !Sub ${azureParametersStack}-S3BucketName
-        S3Key: 'lambda-sso.zip'
+      Timeout: 120
+      Environment:
+        Variables:
+          SecretArn:
+            Fn::ImportValue: !Sub ${ParameterStack}-SecretArn
+          GraphUrl: 'https://graph.microsoft.com/v1.0/'
+          AWSAppName: 'AWS IAM Identity Center (successor to AWS Single Sign-On)'
+          GraphScope: 'https://graph.microsoft.com/.default'
+          GraphAuthority: 'https://login.microsoftonline.com/{}'
+          GroupNames: 'admin-group,power-user-group,read-only-group'
+      CodeUri: ../lambda/
       Handler: lambda-sso.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.8
       Layers:
         - !Ref AzureLayer
   AzureLayer:
-    Type: AWS::Lambda::LayerVersion
+    Type: AWS::Serverless::LayerVersion
     Properties:
+      ContentUri: ../AzureLayer/
       CompatibleRuntimes:
         - python3.8
-      Content:
-        S3Bucket:
-          Fn::ImportValue: !Sub ${azureParametersStack}-S3BucketName
-        S3Key: 'python.zip'
-      LayerName: azureIdentityLayer
-      LicenseInfo: 'https://pypi.org/project/azure-identity/'
+    Metadata:
+      BuildMethod: python3.8
+  LambdaProvison:
+    Type: AWS::Serverless::Function
+    Properties: 
+      Timeout: 120
+      Environment:
+        Variables:
+          SecretArn:
+            Fn::ImportValue: !Sub ${ParameterStack}-SecretArn
+          GraphUrl: 'https://graph.microsoft.com/v1.0/'
+          GraphScope: 'https://graph.microsoft.com/.default'
+          GraphAuthority: 'https://login.microsoftonline.com/{}'
+          GraphBetaUrl: 'https://graph.microsoft.com/beta/servicePrincipals/'
+      CodeUri: ../lambda/
+      Handler: lambda-provision.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.8
+      Layers:
+        - !Ref AzureLayer
 
 
 
