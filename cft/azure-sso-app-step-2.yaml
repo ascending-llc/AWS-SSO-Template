@@ -56,7 +56,7 @@ Resources:
   AzureLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      ContentUri: ../AzureLayer/
+      ContentUri: ../
       CompatibleRuntimes:
         - python3.8
     Metadata:
