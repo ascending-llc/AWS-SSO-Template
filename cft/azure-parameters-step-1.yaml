@@ -28,16 +28,8 @@ Parameters:
     Type: String
     NoEcho: true
     Default: None
-  BucketName:
-    Description: Bucket name for sam deployment
-    Type: String
-    Default: aws-sso-sam-bucket
 
 Resources:
-  S3Bucket: 
-    Type: AWS::S3::Bucket
-    Properties: 
-      BucketName: !Ref BucketName
   SsoSecrets:
     Type: 'AWS::SecretsManager::Secret'
     Properties:
@@ -47,11 +39,6 @@ Resources:
 
 
 Outputs:
-  S3BucketName:
-    Description: S3 Bucket name to store the lambda zip code
-    Value: !Ref S3Bucket
-    Export:
-      Name: !Sub ${AWS::StackName}-S3BucketName
   SecretArn:
     Description: The arn of this sso secret
     Value: !Ref SsoSecrets

@@ -28,7 +28,7 @@ Leave **SCIMEndpoint** and **AccessToken** parameters as default for now
         
         sam build -t ./cft/azure-sso-app-step-2.yaml
     <!-- tsk -->
-        sam deploy --s3-bucket {the bucket name when you deploy parameters template} --stack-name {the name for this stack} --capabilities CAPABILITY_NAMED_IAM --region {your aws region} --parameter-overrides ParameterStack={the stack name for the parameters template}
+        sam deploy --resolve-s3 --stack-name <the name for this stack> --capabilities CAPABILITY_NAMED_IAM --region <your aws region> --parameter-overrides ParameterStack=<the stack name of the parameters template>
 
 - There are two lambdas will be created in your AWS account, run the lamda function fisrt (NOT the provison one)
 - After the first lambda function ran successfully:<br>
