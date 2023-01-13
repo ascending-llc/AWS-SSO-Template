@@ -37,7 +37,8 @@ Resources:
   Lambda:
     Type: AWS::Serverless::Function
     Properties: 
-      Timeout: 120
+      Timeout: 600
+      FunctionName: ProvisionClientAzureEnv
       Environment:
         Variables:
           SecretArn:
@@ -64,7 +65,8 @@ Resources:
   LambdaProvison:
     Type: AWS::Serverless::Function
     Properties: 
-      Timeout: 120
+      Timeout: 600
+      FunctionName: ProvisionClientAWSEnv
       Environment:
         Variables:
           SecretArn:

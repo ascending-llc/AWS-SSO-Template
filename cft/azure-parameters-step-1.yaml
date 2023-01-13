@@ -16,7 +16,7 @@ Parameters:
   identityUrl:
     Type: String
     Description: IAM Identity Center issuer URL
-  acsUrl:
+  ASCUrl:
     Type: String
     Description: IAM Identity Center Assertion Consumer Service (ACS) URL
   SCIMEndpoint:
