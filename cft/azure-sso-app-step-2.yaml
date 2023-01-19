@@ -1,0 +1,98 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Configure aws sso app on azure ad by lambda function
+
+Parameters:
+  ParameterStack:
+    Description: Name of the CloudFormation stack that contains the parameters for sso config
+    Type: String
+
+Resources:
+  LambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "lambda.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: AllowGetSSOParameters
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "secretsmanager:GetSecretValue"
+                Resource:
+                  Fn::ImportValue: !Sub ${ParameterStack}-SecretArn
+  Lambda:
+    Type: AWS::Serverless::Function
+    Properties: 
+      Timeout: 600
+      FunctionName: ProvisionClientAzureEnv
+      Environment:
+        Variables:
+          SecretArn:
+            Fn::ImportValue: !Sub ${ParameterStack}-SecretArn
+          GraphUrl: 'https://graph.microsoft.com/v1.0/'
+          AWSAppName: 'AWS IAM Identity Center (successor to AWS Single Sign-On)'
+          GraphScope: 'https://graph.microsoft.com/.default'
+          GraphAuthority: 'https://login.microsoftonline.com/{}'
+          GroupNames: 'admin-group,power-user-group,read-only-group'
+      CodeUri: ../lambda/
+      Handler: lambda-sso.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.8
+      Layers:
+        - !Ref AzureLayer
+  AzureLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: ../
+      CompatibleRuntimes:
+        - python3.8
+    Metadata:
+      BuildMethod: python3.8
+  LambdaProvison:
+    Type: AWS::Serverless::Function
+    Properties: 
+      Timeout: 600
+      FunctionName: ProvisionClientAWSEnv
+      Environment:
+        Variables:
+          SecretArn:
+            Fn::ImportValue: !Sub ${ParameterStack}-SecretArn
+          GraphUrl: 'https://graph.microsoft.com/v1.0/'
+          GraphScope: 'https://graph.microsoft.com/.default'
+          GraphAuthority: 'https://login.microsoftonline.com/{}'
+          GraphBetaUrl: 'https://graph.microsoft.com/beta/servicePrincipals/'
+      CodeUri: ../lambda/
+      Handler: lambda-provision.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.8
+      Layers:
+        - !Ref AzureLayer
+
+
+
+Outputs:
+  LambdaRoleArn:
+    Description: IAM Role Arn for Lambda function
+    Value: !GetAtt LambdaRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-LambdaRoleArn
+  AzureLayerArn:
+    Description: Azure Layer Arn for Lambda function
+    Value: !Ref AzureLayer
+    Export:
+      Name: !Sub ${AWS::StackName}-AzureLayerArn
+

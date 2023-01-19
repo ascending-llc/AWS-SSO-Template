@@ -1,0 +1,47 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create azure ad parameters in ssm
+
+Parameters:
+  clientId:
+    Description: The client app id
+    Type: String
+  clientSecret:
+    Type: String
+    Description: The client app secret value
+    NoEcho: true
+  tenantId:
+    Type: String
+    Description: The azure AD tenant id
+  identityUrl:
+    Type: String
+    Description: IAM Identity Center issuer URL
+  ASCUrl:
+    Type: String
+    Description: IAM Identity Center Assertion Consumer Service (ACS) URL
+  SCIMEndpoint:
+    Description: After enabled Automatic provisioning in your AWS Identity Center, will show this endpoint
+    Type: String
+    Default: None
+  AccessToken:
+    Description: After enabled Automatic provisioning in your AWS Identity Center, will show this token
+    Type: String
+    NoEcho: true
+    Default: None
+
+Resources:
+  SsoSecrets:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Name: SsoAzureAwsParameters
+      Description: This secret contains all the parameters needed for sso setup between aws and azure ad
+      SecretString: !Sub '{"clientId":"${clientId}", "clientSecret":"${clientSecret}", "tenantId":"${tenantId}", "identityUrl":"${identityUrl}", "acsUrl":"${acsUrl}", "SCIMEndpoint":"${SCIMEndpoint}", "AccessToken":"${AccessToken}"}'
+
+
+Outputs:
+  SecretArn:
+    Description: The arn of this sso secret
+    Value: !Ref SsoSecrets
+    Export:
+      Name: !Sub ${AWS::StackName}-SecretArn
+

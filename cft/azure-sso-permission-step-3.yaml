@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Configure AWS SSO Account Assignment
+
+Parameters: 
+  AwsSsoInsanceArn: 
+    Type: String
+    Description: 'Specify your AWS SSO Instance ARN.'
+  AdministratorGroupID: 
+    Type: String
+    Description: 'the group ID from the IAM Identity Center'
+  PowerUserGroupID: 
+    Type: String
+    Description: 'the group ID from the IAM Identity Center'
+  ViewOnlyGroupID: 
+    Type: String
+    Description: 'the group ID from the IAM Identity Center'
+
+
+
+Resources:
+# Permission Set
+  PermissionSetAdministratorAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref AwsSsoInsanceArn
+      Name: 'AdministratorAccess'
+      ManagedPolicies:
+        - 'arn:aws:iam::aws:policy/AdministratorAccess'
+  PermissionSetPowerUserAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref AwsSsoInsanceArn
+      Name: 'PowerUserAccess'
+      ManagedPolicies:
+        - 'arn:aws:iam::aws:policy/PowerUserAccess'
+  PermissionSetViewOnlyAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref AwsSsoInsanceArn
+      Name: 'ViewOnlyAccess'
+      ManagedPolicies:
+        - 'arn:aws:iam::aws:policy/job-function/ViewOnlyAccess'
+# Account Assignment
+  AccountAdministratorGroupAssignment:
+    Type: AWS::SSO::Assignment
+    Properties: 
+      InstanceArn: !Ref AwsSsoInsanceArn
+      PermissionSetArn: !GetAtt PermissionSetAdministratorAccess.PermissionSetArn
+      PrincipalId: !Ref AdministratorGroupID
+      PrincipalType: 'GROUP'
+      TargetId: !Ref AWS::AccountId
+      TargetType: 'AWS_ACCOUNT'
+  AccountPowerUserGroupAssignment:
+    Type: AWS::SSO::Assignment
+    Properties: 
+      InstanceArn: !Ref AwsSsoInsanceArn
+      PermissionSetArn: !GetAtt PermissionSetPowerUserAccess.PermissionSetArn
+      PrincipalId: !Ref PowerUserGroupID
+      PrincipalType: 'GROUP'
+      TargetId: !Ref AWS::AccountId
+      TargetType: 'AWS_ACCOUNT'
+  AccountViewOnlyGroupAssignment:
+    Type: AWS::SSO::Assignment
+    Properties: 
+      InstanceArn: !Ref AwsSsoInsanceArn
+      PermissionSetArn: !GetAtt PermissionSetViewOnlyAccess.PermissionSetArn
+      PrincipalId: !Ref ViewOnlyGroupID
+      PrincipalType: 'GROUP'
+      TargetId: !Ref AWS::AccountId
+      TargetType: 'AWS_ACCOUNT'
