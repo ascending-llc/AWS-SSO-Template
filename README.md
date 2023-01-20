@@ -42,7 +42,7 @@ Leave **SCIMEndpoint** and **AccessToken** parameters as default for now
     <img src="screenshots/aws_lambda.png" width="500"><br>
 
 - After this lambda function ran successfully:<br>
-    1. There are three groups created on your Azure AD account: read-only group, admin group, and power-user group<br>
+    1. There will be three sample groups created on your Azure AD account: read-only group, admin group, and power-user group<br>
 
     2. Go to your Azure AD and click Enterprise Applications, you will see an application called **AWS Signle Sign-on**. Click this app and navigate to **Single sign-on** on the left panel. Go to SAML Certificates section and download the **Federation Metadata XML**<br>
 
