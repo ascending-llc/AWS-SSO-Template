@@ -35,9 +35,11 @@ Leave **SCIMEndpoint** and **AccessToken** parameters as default for now
         
         sam build -t ./cft/azure-sso-app-step-2.yaml
     <!-- tsk -->
-        sam deploy --resolve-s3 --stack-name <the name for this stack> --capabilities CAPABILITY_NAMED_IAM --region <your aws region> --parameter-overrides ParameterStack=<the stack name of the azure-parameters-step-1.yaml template>
+        sam deploy --resolve-s3 --stack-name <the name for this stack> --capabilities CAPABILITY_NAMED_IAM --region <your aws region> --parameter-overrides ParameterStack=<the stack name of the azure-parameters-step-1.yaml template> customerID=<Ask Vendor to provide> SqsMeteringUsersUrl=<Ask Vendor to provide>
 
-- There are two lambdas will be created in your AWS account, run the **ProvisionClientAzureEnv** lamda function fisrt<br>
+- Go to your CloudFormation console, and open this stack. Click Outputs, and share the Key:**FunctionRoleToShareWithVendor**'s **Value** with us<br>
+- There are three lambdas will be created in your AWS account. 
+- run the **ProvisionClientAzureEnv** lamda function fisrt<br>
     Manually run the lambda function by creating an empty event<br>
     <img src="screenshots/aws_lambda.png" width="500"><br>
 
