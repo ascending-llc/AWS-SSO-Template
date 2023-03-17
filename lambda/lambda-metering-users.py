@@ -5,6 +5,7 @@ import os
 from botocore.exceptions import ClientError
 import boto3
 import logging
+from datetime import datetime
 
 def lambda_handler(event, context):
     cw_data = event['awslogs']['data']
@@ -32,7 +33,8 @@ def lambda_handler(event, context):
             "Message" : {
                 "action" : "users-updated",
                 "customer_id": customerID,
-                "user_numbers": users 
+                "user_numbers": users,
+                "time": str(datetime.now())
             } 
         }
         try:

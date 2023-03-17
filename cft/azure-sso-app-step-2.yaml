@@ -179,5 +179,5 @@ Outputs:
       Name: !Sub ${AWS::StackName}-AzureLayerArn
   FunctionRoleToShareWithVendor:
     Description: Lambda function Role Arn for MeteringUsersLambda to share
-    Value: !Ref MeteringUsersLambdaRole.Arn
+    Value: !GetAtt MeteringUsersLambdaRole.Arn
 
