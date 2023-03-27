@@ -6,6 +6,7 @@ from botocore.exceptions import ClientError
 import boto3
 import logging
 from datetime import datetime
+logging.getLogger().setLevel(logging.ERROR)
 
 def lambda_handler(event, context):
     cw_data = event['awslogs']['data']
@@ -14,7 +15,6 @@ def lambda_handler(event, context):
     data = json.loads(uncompressed_payload.decode('utf-8'))
     sqs_url = os.environ.get("SqsMeteringUsersUrl")
     customerID = os.environ.get("customerID")
-    logging.getLogger().setLevel(logging.ERROR)
     users = 0
     sqs = boto3.client('sqs')
 
@@ -34,14 +34,14 @@ def lambda_handler(event, context):
                 "action" : "users-updated",
                 "customer_id": customerID,
                 "user_numbers": users,
-                "time": str(datetime.now())
+                "time": datetime.now().isoformat(" ")
             } 
         }
         try:
             sqs.send_message(QueueUrl = sqs_url, MessageBody = json.dumps(msm_body),MessageGroupId = source)
         
         except ClientError as e:
-            logging.error(f"Unexpected error: {e}")
+            logging.exception(f"Unexpected error: {e}")
             return
    
         
