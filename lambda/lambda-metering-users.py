@@ -6,6 +6,7 @@ from botocore.exceptions import ClientError
 import boto3
 import logging
 from datetime import datetime
+logging.getLogger().setLevel(logging.ERROR)
 
 def lambda_handler(event, context):
     cw_data = event['awslogs']['data']
