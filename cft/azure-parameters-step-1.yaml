@@ -35,7 +35,7 @@ Resources:
     Properties:
       Name: SsoAzureAwsParameters
       Description: This secret contains all the parameters needed for sso setup between aws and azure ad
-      SecretString: !Sub '{"clientId":"${clientId}", "clientSecret":"${clientSecret}", "tenantId":"${tenantId}", "identityUrl":"${identityUrl}", "acsUrl":"${acsUrl}", "SCIMEndpoint":"${SCIMEndpoint}", "AccessToken":"${AccessToken}"}'
+      SecretString: !Sub '{"clientId":"${clientId}", "clientSecret":"${clientSecret}", "tenantId":"${tenantId}", "identityUrl":"${identityUrl}", "acsUrl":"${ASCUrl}", "SCIMEndpoint":"${SCIMEndpoint}", "AccessToken":"${AccessToken}"}'
 
 
 Outputs:
