@@ -7,6 +7,12 @@ Parameters:
   ParameterStack:
     Description: Name of the CloudFormation stack that contains the parameters for sso config
     Type: String
+  customerID:
+    Description: The customer identifier you got from the vendor
+    Type: String
+  SqsMeteringUsersUrl:
+    Description: The SQS URL you got from the vendor that sends your user counts for metering purpose
+    Type: String 
 
 Resources:
   LambdaRole:
@@ -81,8 +87,84 @@ Resources:
       Runtime: python3.8
       Layers:
         - !Ref AzureLayer
-
-
+  CloudWatch:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 365
+  CloudWatchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - cloudtrail.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: CloudWatchRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+  TrailBucket:
+    Type: AWS::S3::Bucket
+    Properties: {}
+  TrailBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref TrailBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AWSCloudTrailAclCheck
+            Effect: Allow
+            Principal:
+              Service: "cloudtrail.amazonaws.com"
+            Action: "s3:GetBucketAcl"
+            Resource: !Sub "arn:aws:s3:::${TrailBucket}"
+          - Sid: AWSCloudTrailWrite
+            Effect: Allow
+            Principal:
+              Service: "cloudtrail.amazonaws.com"
+            Action: "s3:PutObject"
+            Resource: !Sub "arn:aws:s3:::${TrailBucket}/AWSLogs/${AWS::AccountId}/*"
+  Trail:
+    Type: AWS::CloudTrail::Trail
+    Properties:
+      S3BucketName: !Ref TrailBucket
+      IsLogging: true
+      EnableLogFileValidation: true
+      IncludeGlobalServiceEvents: true
+      IsMultiRegionTrail: true
+      CloudWatchLogsLogGroupArn: !GetAtt CloudWatch.Arn
+      CloudWatchLogsRoleArn: !GetAtt CloudWatchRole.Arn
+  MeteringUsersLambda:
+    Type: AWS::Serverless::Function
+    Properties: 
+      Timeout: 30
+      Environment:
+        Variables:
+          customerID: !Ref customerID
+          SqsMeteringUsersUrl: !Ref SqsMeteringUsersUrl
+      CodeUri: ../lambda/
+      Policies:
+        - AmazonSQSFullAccess
+      Handler: lambda-metering-users.lambda_handler
+      Runtime: python3.8
+      Events:
+        CWLog:
+          Type: CloudWatchLogs
+          Properties:
+            LogGroupName: !Ref CloudWatch
+            FilterPattern: '{ ($.eventName = "DeleteUser" || $.eventName = "CreateUser") && $.eventSource = "sso-directory.amazonaws.com" }'
+  
 
 Outputs:
   LambdaRoleArn:
@@ -95,4 +177,7 @@ Outputs:
     Value: !Ref AzureLayer
     Export:
       Name: !Sub ${AWS::StackName}-AzureLayerArn
+  FunctionRoleToShareWithVendor:
+    Description: Lambda function Role Arn for MeteringUsersLambda to share
+    Value: !GetAtt MeteringUsersLambdaRole.Arn
 
