@@ -11,7 +11,7 @@ Install ASCENDING SSO App from your Azure AD Gallary.<br>
 <img src="screenshots/app_app.png" width="500"><br>
 - After downloading this app, go to App registrations and select ASCENDING app, record its **application (client) ID**<br>
 <img src="screenshots/app_registrations.png" width="500"><br>
-- Click API permissions, and add **Application.ReadWrite.OwnerBy** and **Create groups** application type permissions shown in the screenshot. Make sure to grant admin consent so that the Status column shows green check mark. 
+- Click API permissions, and add **Application.ReadWrite.OwnerBy** and **Create groups** application type permissions shown in the screenshot. Make sure to grant admin consent so that the Status column shows green check mark.<br>
 <img src="screenshots/app_permission.png" width="500"><br>
 - Click Certificates & secrets to create a new client secret and record the **secret value**<br>
 <img src="screenshots/app_secrets.png" width="500"><br>
